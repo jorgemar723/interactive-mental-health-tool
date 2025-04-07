@@ -14,7 +14,6 @@ A web-based application for self-screening anxiety and depression using validate
 - ♿ Accessibility features: ARIA labels, skip links, and keyboard navigation
 
 
-
 ## 🛠️ Tech Stack
 
 - React (JavaScript)
@@ -28,7 +27,6 @@ A web-based application for self-screening anxiety and depression using validate
 interactive-mental-health-tool/
 ├── public/
 │   └── index.html
-│
 ├── src/
 │   ├── assets/                # Wave SVGs for both themes
 │   ├── components/            # Theme toggle
@@ -44,12 +42,10 @@ interactive-mental-health-tool/
 │   ├── Summary.css
 │   ├── animations.css
 │   └── index.js
-│
 ├── .gitignore
 ├── package.json
 ├── package-lock.json
 └── README.md
-
 ```
 
 
@@ -63,7 +59,6 @@ git clone https://github.com/jorgemar723/interactive-mental-health-tool.git
 cd interactive-mental-health-tool
 npm install
 npm start
-
 ```
 
 
