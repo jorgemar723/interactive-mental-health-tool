@@ -1,0 +1,64 @@
+.fade-slide-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .fade-slide-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 300ms ease;
+  }
+  .fade-slide-exit {
+    opacity: 1;
+  }
+  .fade-slide-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 200ms ease;
+  }
+  
+  .insight-box {
+    background: #f3f9f7;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #b8dfd8;
+    font-size: 0.95rem;
+  }
+  
+  body.dark .insight-box {
+    background-color: #2e2e2e;
+    border-color: #444;
+    color: #eee;
+  }
+  
+  .summary-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  
+  .summary-buttons button {
+    background-color: #f0f7f4;
+    border: 1px solid #aaa;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .summary-buttons button:hover {
+    background-color: #e4f2ef;
+  }
+  
+  body.dark .summary-buttons button {
+    background-color: #333;
+    border-color: #666;
+    color: #eee;
+  }
+  
+  body.dark .summary-buttons button:hover {
+    background-color: #444;
+  }
+  
