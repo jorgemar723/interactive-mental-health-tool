@@ -1,27 +1,27 @@
-# 🧠 Interactive Mental Health Assessment Tool
+# Interactive Mental Health Assessment Tool
 
 A web-based application for self-screening anxiety and depression using validated psychological questionnaires — GAD-7 and PHQ-9. Designed with a clean, calming interface to foster a safe user experience.
 
-## 🌟 Features
+## Features
 
-- ✅ Interactive GAD-7 (Anxiety) and PHQ-9 (Depression) quizzes
-- 📊 Real-time scoring with severity interpretation
-- 💾 LocalStorage support for saving past assessments
-- 📝 Optional journaling after each quiz
-- 📂 View individual quiz history (with optional deletion)
-- 📈 Summary dashboard with chart comparisons, filters, and insights
-- 🌓 Light/Dark mode toggle with soft gradients and wave animations
-- ♿ Accessibility features: ARIA labels, skip links, and keyboard navigation
+- Interactive GAD-7 (Anxiety) and PHQ-9 (Depression) quizzes
+- Real-time scoring with severity interpretation
+- LocalStorage support for saving past assessments
+- Optional journaling after each quiz
+- View individual quiz history (with optional deletion)
+- Summary dashboard with chart comparisons, filters, and insights
+- Light/Dark mode toggle with soft gradients and wave animations
+- Accessibility features: ARIA labels, skip links, and keyboard navigation
 
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - React (JavaScript)
 - HTML/CSS (with animations and gradients)
 - Recharts (for visualizing score history)
 - LocalStorage (for persistence)
 
-## 📁 Folder Structure
+## Folder Structure
 
 ```
 interactive-mental-health-tool/
@@ -50,7 +50,7 @@ interactive-mental-health-tool/
 
 
 
-## 🚀 Getting Started
+## Getting Started
 
 Clone and install dependencies:
 
@@ -64,12 +64,12 @@ npm start
 
 The app will run at: http://localhost:3000
 
-## 📦 To Build for Production
+## To Build for Production
 ```
 npm run build
 ```
 
-## 🔒 Privacy Notice
+## Privacy Notice
 This app uses localStorage to store data. All quiz results and journal entries remain on your device and are not shared externally.
-## 📄 License
+## License
 MIT — feel free to use, fork, or modify with credit!
