@@ -9,6 +9,7 @@ const GAD7Quiz = () => {
   const [journal, setJournal] = useState('');
   const [savedJournal, setSavedJournal] = useState('');
   const [privateMode, setPrivateMode] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
   const options = [
@@ -26,6 +27,7 @@ const GAD7Quiz = () => {
   };
 
   const handleChange = (index, value) => {
+    if (submitted) return; // Prevent changes after submission
     const newResponses = [...responses];
     newResponses[index] = parseInt(value);
     setResponses(newResponses);
@@ -44,28 +46,39 @@ const GAD7Quiz = () => {
     }
   }, [privateMode]);
 
+  // Calculate score whenever responses change (but don't save to history yet)
   useEffect(() => {
     if (responses.every(r => r !== null)) {
       const total = responses.reduce((acc, curr) => acc + curr, 0);
-      const severity = getSeverity(total);
       setScore(total);
-
-      const timestampedResult = {
-        score: total,
-        severity,
-        journal: privateMode ? null : journal,
-        timestamp: new Date().toISOString()
-      };
-
-      localStorage.setItem('gad7Result', JSON.stringify(timestampedResult));
-
-      const history = JSON.parse(localStorage.getItem('gad7History')) || [];
-      history.push(timestampedResult);
-      localStorage.setItem('gad7History', JSON.stringify(history));
     } else {
       setScore(null);
     }
-  }, [responses, journal, privateMode]);
+  }, [responses]);
+
+  // Save to history only when explicitly submitted
+  const handleSubmit = () => {
+    if (!responses.every(r => r !== null)) return;
+    
+    const total = responses.reduce((acc, curr) => acc + curr, 0);
+    const severity = getSeverity(total);
+
+    const timestampedResult = {
+      score: total,
+      severity,
+      journal: privateMode ? null : journal,
+      timestamp: new Date().toISOString()
+    };
+
+    localStorage.setItem('gad7Result', JSON.stringify(timestampedResult));
+
+    const history = JSON.parse(localStorage.getItem('gad7History')) || [];
+    history.push(timestampedResult);
+    localStorage.setItem('gad7History', JSON.stringify(history));
+
+    setSubmitted(true);
+    setPreviousResult(timestampedResult);
+  };
 
   const handleJournalChange = (e) => {
     const value = e.target.value;
@@ -88,6 +101,7 @@ const GAD7Quiz = () => {
     setPreviousResult(null);
     setResponses(Array(7).fill(null));
     setScore(null);
+    setSubmitted(false);
   };
 
   return (
@@ -124,6 +138,7 @@ const GAD7Quiz = () => {
                 value={opt.value}
                 checked={responses[index] === opt.value}
                 onChange={(e) => handleChange(index, e.target.value)}
+                disabled={submitted}
               />
               {opt.label}
             </label>
@@ -131,7 +146,28 @@ const GAD7Quiz = () => {
         </div>
       ))}
 
-      {score !== null && (
+      {score !== null && !submitted && (
+        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+          <button 
+            onClick={handleSubmit}
+            className="submit-button"
+            style={{
+              padding: '12px 32px',
+              fontSize: '1.1rem',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            ✓ Submit Quiz
+          </button>
+        </div>
+      )}
+
+      {submitted && score !== null && (
         <>
           <div className="result">
             <h3>Your Score: {score}</h3>
