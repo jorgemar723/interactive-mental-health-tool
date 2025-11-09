@@ -38,7 +38,6 @@ function App() {
         <Route path="/summary" element={<Summary />} />
       </Routes>
 
-      <footer>You are not alone. This is a safe space.</footer>
     </div>
   );
 }
