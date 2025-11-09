@@ -10,6 +10,7 @@ const GAD7Quiz = () => {
   const [savedJournal, setSavedJournal] = useState('');
   const [privateMode, setPrivateMode] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [journalSaved, setJournalSaved] = useState(false);
   const navigate = useNavigate();
 
   const options = [
@@ -36,13 +37,14 @@ const GAD7Quiz = () => {
   useEffect(() => {
     const storedResult = localStorage.getItem('gad7Result');
     if (storedResult) {
-      setPreviousResult(JSON.parse(storedResult));
-    }
-
-    const storedJournal = localStorage.getItem('gad7Journal');
-    if (storedJournal && !privateMode) {
-      setJournal(storedJournal);
-      setSavedJournal(storedJournal);
+      const result = JSON.parse(storedResult);
+      setPreviousResult(result);
+      // Load journal from the last result if it exists
+      if (result.journal && !privateMode) {
+        setJournal(result.journal);
+        setSavedJournal(result.journal);
+        setJournalSaved(true);
+      }
     }
   }, [privateMode]);
 
@@ -63,10 +65,11 @@ const GAD7Quiz = () => {
     const total = responses.reduce((acc, curr) => acc + curr, 0);
     const severity = getSeverity(total);
 
+    // Submit without journal - journal is optional and saved separately
     const timestampedResult = {
       score: total,
       severity,
-      journal: privateMode ? null : journal,
+      journal: null, // Journal will be added later if user saves it
       timestamp: new Date().toISOString()
     };
 
@@ -78,22 +81,50 @@ const GAD7Quiz = () => {
 
     setSubmitted(true);
     setPreviousResult(timestampedResult);
+    setJournalSaved(false); // Reset journal saved state
   };
 
   const handleJournalChange = (e) => {
     const value = e.target.value;
     setJournal(value);
+    setJournalSaved(false); // Mark as unsaved when user types
+  };
 
-    if (!privateMode) {
-      localStorage.setItem('gad7Journal', value);
-      setSavedJournal(value);
+  const handleSaveJournal = () => {
+    if (privateMode) return; // Don't save if private mode is enabled
+    
+    const history = JSON.parse(localStorage.getItem('gad7History')) || [];
+    if (history.length > 0) {
+      // Update the most recent entry (the one we just submitted)
+      const lastEntry = history[history.length - 1];
+      lastEntry.journal = journal;
+      
+      // Update in localStorage
+      localStorage.setItem('gad7History', JSON.stringify(history));
+      localStorage.setItem('gad7Result', JSON.stringify(lastEntry));
+      
+      setPreviousResult(lastEntry);
+      setSavedJournal(journal);
+      setJournalSaved(true);
     }
   };
 
   const clearJournal = () => {
-    localStorage.removeItem('gad7Journal');
     setJournal('');
     setSavedJournal('');
+    setJournalSaved(false);
+    
+    // Also remove journal from the last result if it was saved
+    if (submitted) {
+      const history = JSON.parse(localStorage.getItem('gad7History')) || [];
+      if (history.length > 0) {
+        const lastEntry = history[history.length - 1];
+        lastEntry.journal = null;
+        localStorage.setItem('gad7History', JSON.stringify(history));
+        localStorage.setItem('gad7Result', JSON.stringify(lastEntry));
+        setPreviousResult(lastEntry);
+      }
+    }
   };
 
   const clearResult = () => {
@@ -183,8 +214,8 @@ const GAD7Quiz = () => {
                   onChange={() => {
                     setPrivateMode(prev => !prev);
                     if (!privateMode) {
-                      localStorage.removeItem('gad7Journal');
                       setSavedJournal('');
+                      setJournalSaved(false);
                     }
                   }}
                 />
@@ -192,7 +223,7 @@ const GAD7Quiz = () => {
               </label>
             </div>
 
-            <h4>📝 Journal Reflection</h4>
+            <h4>📝 Journal Reflection (Optional)</h4>
             <textarea
               placeholder="How are you feeling? Write a few thoughts..."
               value={journal}
@@ -201,12 +232,32 @@ const GAD7Quiz = () => {
             />
             <p className="autosave-message">
               {privateMode
-                ? "Private mode enabled — not saved"
-                : journal !== savedJournal
-                ? "Saving..."
-                : "Saved"}
+                ? "Private mode enabled — journal will not be saved"
+                : journalSaved
+                ? "✓ Journal saved"
+                : journal.trim() !== ''
+                ? "Journal not saved yet — click 'Save Journal' to save"
+                : "Journal is optional — you can skip this"}
             </p>
             <div className="journal-buttons">
+              {!privateMode && journal.trim() !== '' && !journalSaved && (
+                <button 
+                  onClick={handleSaveJournal}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '1rem',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    marginRight: '10px'
+                  }}
+                >
+                  💾 Save Journal
+                </button>
+              )}
               <button onClick={clearJournal}>🗑️ Clear Journal</button>
               <button onClick={clearResult}>🗑️ Clear Quiz Result</button>
             </div>

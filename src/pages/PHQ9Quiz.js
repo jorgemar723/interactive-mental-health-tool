@@ -10,6 +10,7 @@ const PHQ9Quiz = () => {
   const [savedJournal, setSavedJournal] = useState('');
   const [privateMode, setPrivateMode] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [journalSaved, setJournalSaved] = useState(false);
   const navigate = useNavigate();
 
   const options = [
@@ -37,13 +38,14 @@ const PHQ9Quiz = () => {
   useEffect(() => {
     const storedResult = localStorage.getItem('phq9Result');
     if (storedResult) {
-      setPreviousResult(JSON.parse(storedResult));
-    }
-
-    const storedJournal = localStorage.getItem('phq9Journal');
-    if (storedJournal && !privateMode) {
-      setJournal(storedJournal);
-      setSavedJournal(storedJournal);
+      const result = JSON.parse(storedResult);
+      setPreviousResult(result);
+      // Load journal from the last result if it exists
+      if (result.journal && !privateMode) {
+        setJournal(result.journal);
+        setSavedJournal(result.journal);
+        setJournalSaved(true);
+      }
     }
   }, [privateMode]);
 
@@ -64,10 +66,11 @@ const PHQ9Quiz = () => {
     const total = responses.reduce((acc, curr) => acc + curr, 0);
     const severity = getSeverity(total);
 
+    // Submit without journal - journal is optional and saved separately
     const timestampedResult = {
       score: total,
       severity,
-      journal: privateMode ? null : journal,
+      journal: null, // Journal will be added later if user saves it
       timestamp: new Date().toISOString()
     };
 
@@ -79,22 +82,50 @@ const PHQ9Quiz = () => {
 
     setSubmitted(true);
     setPreviousResult(timestampedResult);
+    setJournalSaved(false); // Reset journal saved state
   };
 
   const handleJournalChange = (e) => {
     const value = e.target.value;
     setJournal(value);
+    setJournalSaved(false); // Mark as unsaved when user types
+  };
 
-    if (!privateMode) {
-      localStorage.setItem('phq9Journal', value);
-      setSavedJournal(value);
+  const handleSaveJournal = () => {
+    if (privateMode) return; // Don't save if private mode is enabled
+    
+    const history = JSON.parse(localStorage.getItem('phq9History')) || [];
+    if (history.length > 0) {
+      // Update the most recent entry (the one we just submitted)
+      const lastEntry = history[history.length - 1];
+      lastEntry.journal = journal;
+      
+      // Update in localStorage
+      localStorage.setItem('phq9History', JSON.stringify(history));
+      localStorage.setItem('phq9Result', JSON.stringify(lastEntry));
+      
+      setPreviousResult(lastEntry);
+      setSavedJournal(journal);
+      setJournalSaved(true);
     }
   };
 
   const clearJournal = () => {
-    localStorage.removeItem('phq9Journal');
     setJournal('');
     setSavedJournal('');
+    setJournalSaved(false);
+    
+    // Also remove journal from the last result if it was saved
+    if (submitted) {
+      const history = JSON.parse(localStorage.getItem('phq9History')) || [];
+      if (history.length > 0) {
+        const lastEntry = history[history.length - 1];
+        lastEntry.journal = null;
+        localStorage.setItem('phq9History', JSON.stringify(history));
+        localStorage.setItem('phq9Result', JSON.stringify(lastEntry));
+        setPreviousResult(lastEntry);
+      }
+    }
   };
 
   const clearResult = () => {
@@ -184,8 +215,8 @@ const PHQ9Quiz = () => {
                   onChange={() => {
                     setPrivateMode(prev => !prev);
                     if (!privateMode) {
-                      localStorage.removeItem('phq9Journal');
                       setSavedJournal('');
+                      setJournalSaved(false);
                     }
                   }}
                 />
@@ -193,7 +224,7 @@ const PHQ9Quiz = () => {
               </label>
             </div>
 
-            <h4>📝 Journal Reflection</h4>
+            <h4>📝 Journal Reflection (Optional)</h4>
             <textarea
               placeholder="How are you feeling today?"
               value={journal}
@@ -202,12 +233,32 @@ const PHQ9Quiz = () => {
             />
             <p className="autosave-message">
               {privateMode
-                ? "Private mode enabled — not saved"
-                : journal !== savedJournal
-                ? "Saving..."
-                : "Saved"}
+                ? "Private mode enabled — journal will not be saved"
+                : journalSaved
+                ? "✓ Journal saved"
+                : journal.trim() !== ''
+                ? "Journal not saved yet — click 'Save Journal' to save"
+                : "Journal is optional — you can skip this"}
             </p>
             <div className="journal-buttons">
+              {!privateMode && journal.trim() !== '' && !journalSaved && (
+                <button 
+                  onClick={handleSaveJournal}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '1rem',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    marginRight: '10px'
+                  }}
+                >
+                  💾 Save Journal
+                </button>
+              )}
               <button onClick={clearJournal}>🗑️ Clear Journal</button>
               <button onClick={clearResult}>🗑️ Clear Quiz Result</button>
             </div>
