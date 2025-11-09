@@ -26,7 +26,7 @@ function App() {
     <div className="App">
       {/* Theme Toggle Button */}
       <button onClick={toggleTheme} className="theme-toggle-button">
-        {theme === 'dark' ? '🌞 Light Mode' : '🌙 Dark Mode'}
+        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
       </button>
 
       {/* Page Routes */}
@@ -38,7 +38,7 @@ function App() {
         <Route path="/summary" element={<Summary />} />
       </Routes>
 
-      <footer>🫶 You are not alone. This is a safe space.</footer>
+      <footer>You are not alone. This is a safe space.</footer>
     </div>
   );
 }
